@@ -4,9 +4,10 @@ const FileSystem = require("fs");
 const path = require("path");
 const cors = require("cors");
 const movieRouter = require("./movieRouter.js");
-const { default: mongoose } = require("mongoose");
+const userRouter = require("./userRouter.js");
+require("dotenv").config();
 
-// require("dotenv").config();
+const { default: mongoose } = require("mongoose");
 
 const app = express();
 const port = 5000;
@@ -31,7 +32,8 @@ function logger(req, res, next) {
   } catch (error) {}
 }
 
-app.use("/movies", logger, movieRouter);
+app.use("/user", userRouter);
+app.use("/movies", movieRouter);
 
 app.listen(port, () => {
   console.log(`Basic Express App is running at http://localhost:${port}`);

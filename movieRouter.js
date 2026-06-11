@@ -1,8 +1,23 @@
 const router = require("express").Router();
 const movies = require("./movies.js");
 const movieModel = require("./movieModel.js");
+const auth = require("./auth.js");
+const access = require("./accessControl.js");
+const { route } = require("./userRouter.js");
 
-router.get("/", async (req, res) => {
+const multer = require("multer");
+
+const upload = multer({ dest: "files" });
+
+router.post("/upload", auth, upload.single("file"), (req, res) => {
+  res.status(200).send("Upload Successful");
+});
+
+router.get("/test", auth, access("Admin"), (req, res) => {
+  res.send("OK");
+});
+
+router.get("/", auth, access("User"), async (req, res) => {
   try {
     res.send(await movieModel.find());
   } catch (error) {
@@ -10,7 +25,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, access("User"), async (req, res) => {
   try {
     const movie = await movieModel.findById(req.params.id);
     if (movie) {
@@ -23,7 +38,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", auth, access("Admin"), async (req, res) => {
   try {
     const data = req.body;
 
@@ -42,7 +57,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, access("Admin"), async (req, res) => {
   try {
     const movie = await movieModel.findById(req.params.id);
 
@@ -64,7 +79,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", access("Admin"), auth, async (req, res) => {
   try {
     await movieModel.findByIdAndDelete(req.params.id);
     res.send(`Deleted Movie with ID: ${req.params.id}`);
